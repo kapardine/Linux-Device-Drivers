@@ -1,0 +1,35 @@
+*****************Disk on RAM************************************************
+
+This is a block driver which creates 512 bytes of RAM as block driver and reads and writes to it from the terminal.
+The 512 bytes of RAM allocated is partitioned into 3 primary and 3 logical partitions.
+
+References : LDD3 sbull example 
+	   : http://opensourceforu.com/2012/02/device-drivers-disk-on-ram-block-drivers/
+
+Steps to make the driver
+- make
+- sudo insmod ./dor.ko
+
+To check the partitions 
+$ls -l /dev/DiskonRAM*
+
+TO write into a partition ( eg. DiskonRAM1)
+$cat > /dev/DiskonRAM1
+
+To read from the partition
+$xxd /dev/DiskonRAM1
+
+To format a partition into various file systems
+if vfat then
+$mkfs.vfat /dev/DiskonRAM2   
+if ext3 then
+$mkfs.ext3 /dev/DiskonRAM2
+
+You can also use other commands for the same
+
+You can now mount the partition using /mnt , write data in it and then umount it using umount.
+
+To remove the kernel module
+$sudo rmmod dor
+
+This will remove the partitions and the data in the partitions as well.

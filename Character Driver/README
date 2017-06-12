@@ -1,0 +1,47 @@
+*********************README******************************
+
+This is a device driver for generating true random number within a given range  given by the user. TRNG is done in the kernelspace. 
+
+There are following files present-
+
+1. main.c
+2. trng_dev.h
+3. user.c
+4. main_murmur.c
+5. main_random.c
+6. Makefile
+7. README.MD
+
+Description
+
+main.c : Generates random number crypto APIs provided by the kernel. The random number is generates using Hash function. A cryptographic hash 		function takes an input of any size and outputs a fixed size number. Changing one bit of the input will change the output completely. 		Hash functions are good at mixing things together. This mixing property spreads the entropy from the input evenly through the output. 		If the input has more bits of entropy than the size of the output, the output will be highly random. This is how highly entropic 		random numbers are derived from the entropy pool.
+
+	The hash function used by the Linux kernel is the standard SHA-1 cryptographic hash. By hashing the entire pool and and some 		additional arithmetic, 160 random bits are created for use by the system. When this happens, the system lowers its estimate of the 		entropy in the pool accordingly.
+	An interface, such as the cryptographic API that works directly with pages, needs to deal with this tuple, or page vector. An existing 		kernel data structure called a scatterlist is employed, which contains a page vector and normally is used for scatter-gather DMA 		operations.
+
+	The cryptographic API uses scatterlists to operate on arrays of discontiguous page vectors. The primary purpose of scatter-gather in 		the kernel is to avoid unnecessary copying of data. It also seems to result in cleaner code. The kernel cryptographic API uses the same general concept 		but operates on pages instead of plain memory buffers.
+	For more details-
+	http://www.linuxjournal.com/article/6451
+
+main_random.c : This uses kernel's entropy pool for generating random number(/dev/urandom). To know how it generates random numbers or what constitutes its entropy pool, read - https://lwn.net/Articles/283103/
+
+main_murmur.c : This uses random number from entropy as seed value and further manupulates the number using MurmurHash64 algorithm. For the algorithm description-https://en.wikipedia.org/wiki/MurmurHash
+		      http://www.saguiitay.com/2014/10/17/murmurhash-a-fast-hashing-algorithm/
+
+How to build
+ - To build all module :
+	make
+ - Insert module
+	sudo insmod ./main.ko  
+ - Static node creation
+	sudo mknod /dev/trng_dev c 100 0
+ - Compile user file
+	gcc -o <file_name> user.c
+ - Run user file
+	./<file_name>
+
+Insert ONLY ONE module at a time in the kernel for non-ominous functioning of the kernel.
+
+
+
+***************~cheers~**********************************************************
